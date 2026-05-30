@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>条文検索</title>
+<style>
+  :root {
+    --primary: #e8dcc8;
+    --accent:  #c9a84c;
+    --bg:      #111;
+    --surface: rgba(255,255,255,0.04);
+    --border:  rgba(201,168,76,0.2);
+    --muted:   #888;
+    --error:   #c0392b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--primary);
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px 60px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  /* ── ヘッダー ── */
+  .app-title {
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    opacity: 0.8;
+    text-align: center;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+
+  /* ── 法令セレクター ── */
+  .law-select-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .law-select-wrap::after {
+    content: "▾";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    pointer-events: none;
+    font-size: 0.9rem;
+  }
+  select#law-select {
+    width: 100%;
+    padding: 12px 36px 12px 14px;
+    font-size: 0.95rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--primary);
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.25s;
+    letter-spacing: 0.05em;
+  }
+  select#law-select:focus { border-color: var(--accent); }
+  select#law-select option { background: #1a1a1a; }
+
+  /* ── 条文番号入力 ── */
+  .article-input-wrap {
+    margin-bottom: 14px;
+  }
+  input#article-input {
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--primary);
+    outline: none;
+    transition: border-color 0.25s;
+  }
+  input#article-input::placeholder { color: var(--muted); }
+  input#article-input:focus { border-color: var(--accent); }
+  input#article-input::-webkit-inner-spin-button,
+  input#article-input::-webkit-outer-spin-button { opacity: 0.3; }
+
+  /* ── 結果エリア ── */
+  #result-area {
+    min-height: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+    line-height: 1.9;
+    font-size: 0.97rem;
+    color: var(--primary);
+  }
+  #result-area .article-heading {
+    color: var(--accent);
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+  }
+  .placeholder {
+    color: var(--muted);
+    text-align: center;
+    padding-top: 48px;
+    font-size: 0.88rem;
+    letter-spacing: 0.05em;
+  }
+  .placeholder.error { color: var(--error); }
+  .loading {
+    color: var(--muted);
+    text-align: center;
+    padding-top: 48px;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── コピーボタン ── */
+  #btn-copy {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  #btn-copy:hover {
+    background: rgba(201,168,76,0.1);
+    border-color: var(--accent);
+  }
+  #btn-copy:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  /* ── フッター ── */
+  .app-footer {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    line-height: 1.7;
+  }
+  .app-footer a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(136,136,136,0.3);
+  }
+  .app-footer a:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-title">条文検索</div>
+
+  <div class="law-select-wrap">
+    <select id="law-select" aria-label="法令を選択"></select>
+  </div>
+
+  <div class="article-input-wrap">
+    <input type="number" id="article-input" placeholder="条文番号を入力" min="1" disabled>
+  </div>
+
+  <div id="result-area">
+    <div class="loading">読み込み中…</div>
+  </div>
+
+  <button id="btn-copy" disabled>内容をコピー</button>
+
+  <div class="app-footer">
+    条文データは各法令の原文に基づきます。<br>
+    法的判断には必ず一次資料をご確認ください。
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ─── DOM ─── */
+  const lawSelect   = document.getElementById('law-select');
+  const articleInput = document.getElementById('article-input');
+  const resultArea  = document.getElementById('result-area');
+  const btnCopy     = document.getElementById('btn-copy');
+
+  /* ─── 状態 ─── */
+  let currentArticles = {};   // { 1: "第一条 …", … }
+  let currentMeta     = null; // manifest の1エントリ
+
+  /* ─── 漢数字 → 整数 ─── */
+  function kanjiToNum(k) {
+    const t = { 一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9 };
+    if (k === '十')  return 10;
+    if (k === '百')  return 100;
+    if (k.startsWith('百')) return 100 + kanjiToNum(k.slice(1));
+    if (k.startsWith('十')) return 10 + (t[k[1]] || 0);
+    if (k.length === 1) return t[k] || 0;
+    // 二十〜九十九
+    return t[k[0]] * 10 + (k[2] ? t[k[2]] || 0 : 0);
+  }
+
+  /* ─── テキスト → 条文オブジェクト（漢数字スタイル） ─── */
+  function parseKanjiArticles(text) {
+    const result = {};
+    const lines  = text.trim().split('\n');
+    let cur = null;
+    lines.forEach(line => {
+      const m = line.match(/^第([一二三四五六七八九十百]+)条/);
+      if (m) {
+        cur = kanjiToNum(m[1]);
+        result[cur] = line.trim();
+      } else if (cur && line.trim()) {
+        result[cur] += '\n' + line.trim();
+      }
+    });
+    return result;
+  }
+
+  /* ─── テキスト → 条文オブジェクト（アラビア数字スタイル） ─── */
+  function parseArabicArticles(text) {
+    const result = {};
+    const lines  = text.trim().split('\n');
+    let cur = null;
+    lines.forEach(line => {
+      const m = line.match(/^第(\d+)条/);
+      if (m) {
+        cur = parseInt(m[1], 10);
+        result[cur] = line.trim();
+      } else if (cur && line.trim()) {
+        result[cur] += '\n' + line.trim();
+      }
+    });
+    return result;
+  }
+
+  /* ─── 表示 ─── */
+  function showPlaceholder(msg, isError) {
+    resultArea.innerHTML =
+      `<div class="placeholder${isError ? ' error' : ''}">${msg}</div>`;
+    btnCopy.disabled = true;
+  }
+
+  function showArticle(num) {
+    const text = currentArticles[num];
+    if (!text) {
+      const max = currentMeta ? currentMeta.maxArticle : '?';
+      showPlaceholder(`該当なし (1–${max})`, true);
+      return;
+    }
+    // 条文見出し行と本文を分離して表示
+    const firstNL = text.indexOf('\n');
+    const heading = firstNL === -1 ? text : text.slice(0, firstNL);
+    const body    = firstNL === -1 ? '' : text.slice(firstNL + 1);
+    resultArea.innerHTML =
+      `<span class="article-heading">【第${num}条】</span>${body || heading}`;
+    btnCopy.disabled = false;
+  }
+
+  /* ─── 法令テキスト読み込み ─── */
+  async function loadLaw(meta) {
+    currentMeta     = meta;
+    currentArticles = {};
+    articleInput.disabled = true;
+    articleInput.value    = '';
+    articleInput.placeholder = '読み込み中…';
+    showPlaceholder('読み込み中…', false);
+
+    try {
+      const res  = await fetch(meta.file);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+
+      currentArticles = (meta.articleStyle === 'arabic')
+        ? parseArabicArticles(text)
+        : parseKanjiArticles(text);
+
+      articleInput.max         = meta.maxArticle;
+      articleInput.placeholder = `条文番号を入力 (1～${meta.maxArticle})`;
+      articleInput.disabled    = false;
+      showPlaceholder('番号を入力してください', false);
+    } catch (e) {
+      showPlaceholder('条文ファイルの読み込みに失敗しました', true);
+      console.error(e);
+    }
+  }
+
+  /* ─── manifest 読み込み ─── */
+  async function init() {
+    try {
+      const res      = await fetch('data/manifest.json');
+      if (!res.ok) throw new Error(`manifest: HTTP ${res.status}`);
+      const manifest = await res.json();
+
+      // セレクタを生成
+      lawSelect.innerHTML = '';
+      manifest.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value       = item.id;
+        opt.textContent = item.label;
+        lawSelect.appendChild(opt);
+      });
+
+      // 最初の法令を読み込む
+      if (manifest.length > 0) {
+        await loadLaw(manifest[0]);
+      }
+
+      // 法令切り替え
+      lawSelect.addEventListener('change', () => {
+        const selected = manifest.find(m => m.id === lawSelect.value);
+        if (selected) loadLaw(selected);
+      });
+
+    } catch (e) {
+      showPlaceholder('manifest.json の読み込みに失敗しました', true);
+      console.error(e);
+    }
+  }
+
+  /* ─── 条文番号入力 ─── */
+  articleInput.addEventListener('input', e => {
+    const val = parseInt(e.target.value, 10);
+    if (!e.target.value) {
+      showPlaceholder('番号を入力してください', false);
+      return;
+    }
+    showArticle(val);
+  });
+
+  /* ─── コピー ─── */
+  btnCopy.addEventListener('click', () => {
+    const text = resultArea.innerText;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btnCopy.textContent;
+      btnCopy.textContent = 'コピーしました！';
+      btnCopy.style.background    = 'rgba(201,168,76,0.12)';
+      btnCopy.style.borderColor   = 'var(--accent)';
+      setTimeout(() => {
+        btnCopy.textContent = orig;
+        btnCopy.style.background  = '';
+        btnCopy.style.borderColor = '';
+      }, 1000);
+    });
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
