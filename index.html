@@ -233,9 +233,11 @@
       const m = line.match(/^第([一二三四五六七八九十百]+)条/);
       if (m) {
         cur = kanjiToNum(m[1]);
-        result[cur] = line.trim();
-      } else if (cur && line.trim()) {
-        result[cur] += '\n' + line.trim();
+        // 「第〇条　本文…」形式：見出し部分を除いた本文のみ保存
+        const inline = line.replace(/^第[一二三四五六七八九十百]+条[\s　]*/, '').trim();
+        result[cur] = inline;
+      } else if (cur !== null && line.trim()) {
+        result[cur] += (result[cur] ? '\n' : '') + line.trim();
       }
     });
     return result;
@@ -250,9 +252,11 @@
       const m = line.match(/^第(\d+)条/);
       if (m) {
         cur = parseInt(m[1], 10);
-        result[cur] = line.trim();
-      } else if (cur && line.trim()) {
-        result[cur] += '\n' + line.trim();
+        // 「第〇条　本文…」形式：見出し部分を除いた本文のみ保存
+        const inline = line.replace(/^第\d+条[\s　]*/, '').trim();
+        result[cur] = inline;
+      } else if (cur !== null && line.trim()) {
+        result[cur] += (result[cur] ? '\n' : '') + line.trim();
       }
     });
     return result;
@@ -272,12 +276,9 @@
       showPlaceholder(`該当なし (1–${max})`, true);
       return;
     }
-    // 条文見出し行と本文を分離して表示
-    const firstNL = text.indexOf('\n');
-    const heading = firstNL === -1 ? text : text.slice(0, firstNL);
-    const body    = firstNL === -1 ? '' : text.slice(firstNL + 1);
+    // パース時点で見出しを除いた本文のみ格納済みなのでそのまま表示
     resultArea.innerHTML =
-      `<span class="article-heading">【第${num}条】</span>${body || heading}`;
+      `<span class="article-heading">【第${num}条】</span>${text}`;
     btnCopy.disabled = false;
   }
 
