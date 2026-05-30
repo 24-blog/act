@@ -236,11 +236,11 @@
     const lines  = text.trim().split('\n');
     let cur = null;
     lines.forEach(line => {
-      const m = line.match(/^第([一二三四五六七八九十百]+)条/);
+      const m = line.match(/^第([一二三四五六七八九十百千]+)条/);
       if (m) {
         cur = kanjiToNum(m[1]);
         // 「第〇条　本文…」形式：見出し部分を除いた本文のみ保存
-        const inline = line.replace(/^第[一二三四五六七八九十百]+条[\s　]*/, '').trim();
+        const inline = line.replace(/^第[一二三四五六七八九十百千]+条[\s　]*/, '').trim();
         result[cur] = inline;
       } else if (cur !== null && line.trim()) {
         result[cur] += (result[cur] ? '\n' : '') + line.trim();
