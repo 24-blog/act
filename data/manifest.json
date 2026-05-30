@@ -1,16 +1,1 @@
-[
-  {
-    "id": "constitution",
-    "label": "日本国憲法",
-    "file": "data/constitution.txt",
-    "maxArticle": 103,
-    "articleStyle": "kanji"
-  },
-  {
-  "id": "civil",
-  "label": "民法",
-  "file": "data/civil.txt",
-  "maxArticle": 1050,
-  "articleStyle": "kanji"
-  }
-]
+[{"id":"constitution","label":"日本国憲法","file":"data/constitution.txt","maxArticle":103,"articleStyle":"kanji"},{"id":"civil","label":"民法","file":"data/civil.txt","maxArticle":1050,"articleStyle":"kanji"}]
