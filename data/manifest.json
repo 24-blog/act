@@ -5,7 +5,7 @@
     "file": "data/constitution.txt",
     "maxArticle": 103,
     "articleStyle": "kanji"
-  }
+  },
   {
   "id": "civil",
   "label": "民法",
