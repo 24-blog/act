@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>法令テキスト変換ツール</title>
+<style>
+  :root {
+    --primary: #e8dcc8;
+    --accent:  #c9a84c;
+    --bg:      #111;
+    --surface: rgba(255,255,255,0.04);
+    --border:  rgba(201,168,76,0.2);
+    --muted:   #888;
+    --error:   #c0392b;
+    --ok:      #4caf78;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--primary);
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px 60px;
+  }
+  .app { width: 100%; max-width: 700px; }
+
+  h1 {
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    opacity: 0.8;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 28px;
+    letter-spacing: 0.05em;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--primary);
+    outline: none;
+    transition: border-color 0.25s;
+    margin-bottom: 10px;
+    font-family: "DM Mono", "Courier New", monospace;
+  }
+  input[type="text"]::placeholder { color: var(--muted); font-family: inherit; }
+  input[type="text"]:focus { border-color: var(--accent); }
+
+  .hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .hint a { color: var(--accent); text-decoration: none; }
+  .hint a:hover { text-decoration: underline; }
+
+  button {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    transition: background 0.25s, border-color 0.25s;
+    margin-bottom: 10px;
+  }
+  button:hover { background: rgba(201,168,76,0.1); border-color: var(--accent); }
+  button:disabled { opacity: 0.35; cursor: default; }
+
+  #status {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+    min-height: 1.2em;
+    text-align: center;
+  }
+  #status.ok    { color: var(--ok); }
+  #status.error { color: var(--error); }
+  #status.info  { color: var(--muted); }
+
+  /* 結果エリア */
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .result-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .result-meta {
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  textarea#output {
+    width: 100%;
+    height: 320px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--primary);
+    font-family: "DM Mono", "Courier New", monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    resize: vertical;
+    outline: none;
+    margin-bottom: 10px;
+    white-space: pre;
+  }
+
+  .btn-row { display: flex; gap: 8px; }
+  .btn-row button { margin-bottom: 0; }
+
+  /* manifest スニペット */
+  .snippet-wrap {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .snippet-title {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  pre#snippet {
+    padding: 14px 16px;
+    font-family: "DM Mono", "Courier New", monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--primary);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  pre#snippet .key   { color: var(--accent); }
+  pre#snippet .val   { color: #a8d8a8; }
+  pre#snippet .str   { color: #d4a8d8; }
+
+  .footer {
+    margin-top: 30px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <h1>法令テキスト変換ツール</h1>
+  <p class="subtitle">e-Gov 法令API → data/*.txt 変換</p>
+
+  <label>法令ID または 法令番号</label>
+  <input type="text" id="law-id"
+    placeholder="例: 129AC0000000089  または  明治二十九年法律第八十九号">
+
+  <p class="hint">
+    法令IDは <a href="https://laws.e-gov.go.jp/" target="_blank">e-Gov 法令検索</a>
+    のURLから確認できます。<br>
+    例）https://laws.e-gov.go.jp/law/<strong>129AC0000000089</strong>/
+  </p>
+
+  <label>保存ファイル名（拡張子なし）</label>
+  <input type="text" id="file-name" placeholder="例: civil_code">
+
+  <button id="btn-fetch">取得・変換</button>
+  <div id="status" class="info">法令IDを入力して取得してください</div>
+
+  <div class="result-header">
+    <span class="result-label">変換結果テキスト</span>
+    <span class="result-meta" id="article-count"></span>
+  </div>
+  <textarea id="output" readonly placeholder="ここに変換テキストが表示されます"></textarea>
+
+  <div class="btn-row">
+    <button id="btn-copy" disabled>テキストをコピー</button>
+    <button id="btn-dl"   disabled>ファイルとしてDL</button>
+  </div>
+
+  <div class="snippet-wrap" id="snippet-wrap" style="display:none">
+    <div class="snippet-title">manifest.json に追加するエントリ</div>
+    <pre id="snippet"></pre>
+  </div>
+
+  <div class="footer">
+    取得データは e-Gov 法令検索（デジタル庁）提供。政府標準利用規約(第2.0版)に基づき利用可能です。
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const lawIdInput  = document.getElementById('law-id');
+  const fileNameInput = document.getElementById('file-name');
+  const btnFetch    = document.getElementById('btn-fetch');
+  const statusEl    = document.getElementById('status');
+  const outputEl    = document.getElementById('output');
+  const articleCount = document.getElementById('article-count');
+  const btnCopy     = document.getElementById('btn-copy');
+  const btnDl       = document.getElementById('btn-dl');
+  const snippetWrap = document.getElementById('snippet-wrap');
+  const snippetEl   = document.getElementById('snippet');
+
+  let lastLawTitle  = '';
+  let lastMaxArticle = 0;
+
+  /* ── ステータス表示 ── */
+  function setStatus(msg, type) {
+    statusEl.textContent = msg;
+    statusEl.className   = type; // ok / error / info
+  }
+
+  /* ── XML → テキスト変換 ── */
+  function xmlToText(xmlStr) {
+    const parser = new DOMParser();
+    const doc    = parser.parseFromString(xmlStr, 'application/xml');
+
+    // エラーチェック
+    const parseErr = doc.querySelector('parsererror');
+    if (parseErr) throw new Error('XMLのパースに失敗しました');
+
+    const code = doc.querySelector('Result > Code')?.textContent;
+    if (code && code !== '0') {
+      const msg = doc.querySelector('Result > Message')?.textContent || '不明なエラー';
+      throw new Error(`API エラー (${code}): ${msg}`);
+    }
+
+    lastLawTitle = doc.querySelector('LawTitle')?.textContent?.trim() || '';
+
+    const lines = [];
+    let maxArt  = 0;
+
+    // Article要素を順に処理
+    const articles = doc.querySelectorAll('Article');
+    articles.forEach(article => {
+      const num = article.getAttribute('Num') || '';
+      // 条番号の取得（ArticleTitle または Num属性から）
+      const titleEl = article.querySelector('ArticleTitle');
+      const titleText = titleEl?.textContent?.trim() || `第${num}条`;
+
+      // 各項(Paragraph)を収集
+      const paragraphs = article.querySelectorAll('Paragraph');
+      const paraLines  = [];
+
+      paragraphs.forEach((para, idx) => {
+        // ParagraphNum と ParagraphSentence
+        const paraNum  = para.getAttribute('Num') || String(idx + 1);
+        const sentences = para.querySelectorAll('Sentence');
+        const sentText  = Array.from(sentences)
+          .map(s => s.textContent.trim())
+          .filter(Boolean)
+          .join('');
+
+        // 号(Item)があれば追加
+        const items = para.querySelectorAll('Item');
+        const itemLines = Array.from(items).map(item => {
+          const itemNum  = item.querySelector('ItemTitle')?.textContent?.trim() || '';
+          const itemSent = Array.from(item.querySelectorAll('Sentence'))
+            .map(s => s.textContent.trim()).join('');
+          return itemNum ? `${itemNum}　${itemSent}` : itemSent;
+        });
+
+        if (idx === 0) {
+          // 第1項は条見出しと同行
+          paraLines.push(sentText);
+        } else {
+          paraLines.push(`${paraNum}　${sentText}`);
+        }
+        itemLines.forEach(l => paraLines.push(l));
+      });
+
+      // 行として組み立て
+      const firstLine = `${titleText}　${paraLines[0] || ''}`;
+      lines.push(firstLine);
+      for (let i = 1; i < paraLines.length; i++) {
+        lines.push(paraLines[i]);
+      }
+
+      // 最大条番号を更新（数値部分だけ抽出）
+      const numMatch = titleText.match(/第([〇一二三四五六七八九十百千\d]+)条/);
+      if (numMatch) {
+        const n = parseArticleNum(numMatch[1]);
+        if (n > maxArt) maxArt = n;
+      }
+    });
+
+    lastMaxArticle = maxArt;
+    return lines.join('\n');
+  }
+
+  /* ── 条番号文字列 → 整数 ── */
+  function parseArticleNum(s) {
+    // アラビア数字
+    if (/^\d+$/.test(s)) return parseInt(s, 10);
+    // 漢数字
+    const t = { 〇:0,一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9 };
+    if (s === '十') return 10;
+    if (s === '百') return 100;
+    if (s === '千') return 1000;
+    // 百・十の位
+    let val = 0;
+    const chars = s.split('');
+    for (let i = 0; i < chars.length; i++) {
+      const c = chars[i];
+      if (c === '千') { val += 1000; }
+      else if (c === '百') {
+        const prev = t[chars[i-1]];
+        if (prev !== undefined) { val += prev * 100 - prev; } // すでに加算済みの分を差し引く
+        else val += 100;
+      } else if (c === '十') {
+        const prev = t[chars[i-1]];
+        if (prev !== undefined) { val += prev * 10 - prev; }
+        else val += 10;
+      } else {
+        val += t[c] || 0;
+      }
+    }
+    return val || parseInt(s, 10) || 0;
+  }
+
+  /* ── manifest スニペット生成 ── */
+  function buildSnippet(fileName, title, maxArticle) {
+    const obj = {
+      id:           fileName,
+      label:        title,
+      file:         `data/${fileName}.txt`,
+      maxArticle:   maxArticle,
+      articleStyle: 'kanji'
+    };
+    return JSON.stringify(obj, null, 2);
+  }
+
+  /* ── 取得・変換 ── */
+  btnFetch.addEventListener('click', async () => {
+    const rawId   = lawIdInput.value.trim();
+    const fname   = fileNameInput.value.trim();
+    if (!rawId) { setStatus('法令IDを入力してください', 'error'); return; }
+    if (!fname) { setStatus('ファイル名を入力してください', 'error'); return; }
+
+    btnFetch.disabled = true;
+    btnCopy.disabled  = true;
+    btnDl.disabled    = true;
+    snippetWrap.style.display = 'none';
+    outputEl.value    = '';
+    articleCount.textContent = '';
+    setStatus('取得中…', 'info');
+
+    const url = `https://laws.e-gov.go.jp/api/1/lawdata/${encodeURIComponent(rawId)}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const xmlStr = await res.text();
+
+      const text = xmlToText(xmlStr);
+      outputEl.value = text;
+
+      // 条文数カウント
+      const count = (text.match(/^第[〇一二三四五六七八九十百千\d]/gm) || []).length;
+      articleCount.textContent = `${count} 条`;
+
+      setStatus(`✓ 取得完了 ── ${lastLawTitle}`, 'ok');
+
+      btnCopy.disabled = false;
+      btnDl.disabled   = false;
+
+      // manifest スニペット
+      snippetEl.textContent = buildSnippet(fname, lastLawTitle, lastMaxArticle);
+      snippetWrap.style.display = 'block';
+
+    } catch (e) {
+      setStatus('エラー: ' + e.message, 'error');
+      console.error(e);
+    } finally {
+      btnFetch.disabled = false;
+    }
+  });
+
+  /* ── コピー ── */
+  btnCopy.addEventListener('click', () => {
+    navigator.clipboard.writeText(outputEl.value).then(() => {
+      const orig = btnCopy.textContent;
+      btnCopy.textContent = 'コピーしました！';
+      setTimeout(() => { btnCopy.textContent = orig; }, 1000);
+    });
+  });
+
+  /* ── ダウンロード ── */
+  btnDl.addEventListener('click', () => {
+    const fname = (fileNameInput.value.trim() || 'law') + '.txt';
+    const blob  = new Blob([outputEl.value], { type: 'text/plain;charset=utf-8' });
+    const a     = document.createElement('a');
+    a.href      = URL.createObjectURL(blob);
+    a.download  = fname;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+})();
+</script>
+</body>
+</html>
