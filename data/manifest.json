@@ -1,1 +1,9 @@
-
+[
+  {
+    "id": "constitution",
+    "label": "日本国憲法",
+    "file": "data/constitution.txt",
+    "maxArticle": 103,
+    "articleStyle": "kanji"
+  },
+]
