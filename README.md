@@ -62,8 +62,8 @@ GitHub Pages で動作する、法令条文の番号検索ツールです。
 
 以上の2ステップで法令が追加されます。
 
-### 3. 法令取得
+### 3. 法令をtxt形式で取得する
 https://24-blog.github.io/act/converter.html
 
-## 備考
+#### 備考
 Json追加は一行形式とする
