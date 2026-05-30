@@ -215,13 +215,19 @@
   /* ─── 漢数字 → 整数 ─── */
   function kanjiToNum(k) {
     const t = { 一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9 };
-    if (k === '十')  return 10;
-    if (k === '百')  return 100;
-    if (k.startsWith('百')) return 100 + kanjiToNum(k.slice(1));
-    if (k.startsWith('十')) return 10 + (t[k[1]] || 0);
-    if (k.length === 1) return t[k] || 0;
-    // 二十〜九十九
-    return t[k[0]] * 10 + (k[2] ? t[k[2]] || 0 : 0);
+    let n = 0;
+    // 千の位（千〜九千）
+    const senM = k.match(/^([二三四五六七八九]?)千/);
+    if (senM) { n += (senM[1] ? t[senM[1]] : 1) * 1000; k = k.slice(senM[0].length); }
+    // 百の位（百〜九百）
+    const hyaM = k.match(/^([二三四五六七八九]?)百/);
+    if (hyaM) { n += (hyaM[1] ? t[hyaM[1]] : 1) * 100;  k = k.slice(hyaM[0].length); }
+    // 十の位（十〜九十）
+    const juuM = k.match(/^([二三四五六七八九]?)十/);
+    if (juuM) { n += (juuM[1] ? t[juuM[1]] : 1) * 10;   k = k.slice(juuM[0].length); }
+    // 一の位
+    if (k.length > 0) n += t[k[0]] || 0;
+    return n;
   }
 
   /* ─── テキスト → 条文オブジェクト（漢数字スタイル） ─── */
