@@ -61,3 +61,6 @@ GitHub Pages で動作する、法令条文の番号検索ツールです。
 | `articleStyle` | `"kanji"`（第一条）または `"arabic"`（第1条） |
 
 以上の2ステップで法令が追加されます。
+
+法令取得
+https://24-blog.github.io/act/converter.html
