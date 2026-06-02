@@ -1,4 +1,4 @@
-The source code of this repository is licensed under MIT.
+The source code of this repository is licensed under  AGPL-3.0.
 
 Original government documents remain subject to their
 respective copyright and usage terms.
