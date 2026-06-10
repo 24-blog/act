@@ -67,10 +67,6 @@ GitHub Pages で動作する、法令条文の番号検索ツールです。
 https://24-blog.github.io/act/converter.html
 
 
-Preview<br>
-https://24-blog.github.io/act/
-
-
 ⚠️COPYRIGHT<br>
 The source code of this repository is licensed under  AGPL-3.0.
 
