@@ -1,3 +1,6 @@
+[![License](https://img.shields.io/github/license/24-blog/act)](LICENSE)
+
+
 # 条文検索 / Law Article Search
 
 GitHub Pages で動作する、法令条文の番号検索ツールです。
@@ -69,8 +72,6 @@ https://24-blog.github.io/act/converter.html
 <br>
 
 ⚠️COPYRIGHT<br>
-The source code of this repository is licensed under  AGPL-3.0.
-
 Original government documents remain subject to their
 respective copyright and usage terms.
 
