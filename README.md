@@ -72,6 +72,8 @@ https://24-blog.github.io/act/converter.html
 ### データ取得日時
 2026.05:憲法 / 民法 / 刑法
 
+> [!TIP]
+> The laws and regulations discussed in this article are based on information available at the time of publication and may have changed since then.
 
 ⚠️COPYRIGHT<br>
 Original government documents remain subject to their
@@ -79,6 +81,3 @@ respective copyright and usage terms.
 
 Textual commentary written by the repository owner is
 licensed under CC BY-NC-ND 4.0.
-
-> [!TIP]
-> The laws and regulations discussed in this article are based on information available at the time of publication and may have changed since then.
