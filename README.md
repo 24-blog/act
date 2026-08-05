@@ -73,8 +73,7 @@ https://24-blog.github.io/act/converter.html
 2026.05<br>
 憲法 / 民法 / 刑法
 
-> [!TIP]
-> The laws and regulations discussed in this article are based on information available at the time of publication and may have changed since then.
+The accuracy of the content is based on the laws and regulations as of the time of retrieval.
 
 ⚠️COPYRIGHT<br>
 Original government documents remain subject to their
