@@ -79,3 +79,6 @@ respective copyright and usage terms.
 
 Textual commentary written by the repository owner is
 licensed under CC BY-NC-ND 4.0.
+
+> [!TIP]
+> The laws and regulations discussed in this article are based on information available at the time of publication and may have changed since then.
