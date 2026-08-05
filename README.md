@@ -69,7 +69,9 @@ GitHub Pages で動作する、法令条文の番号検索ツールです。
 ### 3. 法令をtxt形式で取得する
 https://24-blog.github.io/act/converter.html
 
-<br>
+### データ取得日時
+2026.05:憲法 / 民法 / 刑法
+
 
 ⚠️COPYRIGHT<br>
 Original government documents remain subject to their
