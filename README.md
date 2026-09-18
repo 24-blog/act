@@ -70,8 +70,8 @@ GitHub Pages で動作する、法令条文の番号検索ツールです。
 https://24-blog.github.io/act/converter.html
 
 ### データ取得日時
-2026.05<br>
-憲法 / 民法 / 刑法
+> 2026.05<br>
+> 憲法 / 民法 / 刑法
 
 The accuracy of the content is based on the laws and regulations as of the time of retrieval.
 
