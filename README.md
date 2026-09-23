@@ -74,10 +74,7 @@ https://24-blog.github.io/act/converter.html
 > 憲法 / 民法 / 刑法
 > 
 > The accuracy of the content is based on the laws and regulations as of the time of retrieval.
-> 
-> Original government documents remain subject to their
-respective copyright and usage terms.
 
 
 ⚠️COPYRIGHT<br>
-Data: Public domain<br>Text: CC BY-NC-ND-4.0
+All non-code text authored by the repository owner is licensed under CC BY-NC-ND 4.0. (Data: Public domain)
