@@ -76,8 +76,7 @@ https://24-blog.github.io/act/converter.html
 The accuracy of the content is based on the laws and regulations as of the time of retrieval.
 
 ⚠️COPYRIGHT<br>
+Data: Public domain<br>Textual commentary: CC BY-NC-ND-4.0
+
 Original government documents remain subject to their
 respective copyright and usage terms.
-
-Textual commentary written by the repository owner is
-licensed under CC BY-NC-ND 4.0.
