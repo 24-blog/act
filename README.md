@@ -80,4 +80,4 @@ respective copyright and usage terms.
 
 
 ⚠️COPYRIGHT<br>
-Data: Public domain<br>Textual commentary: CC BY-NC-ND-4.0
+Data: Public domain<br>Text: CC BY-NC-ND-4.0
