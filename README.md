@@ -72,11 +72,10 @@ https://24-blog.github.io/act/converter.html
 ### データ取得日時
 > 2026.05<br>
 > 憲法 / 民法 / 刑法
+> The accuracy of the content is based on the laws and regulations as of the time of retrieval.
+> Original government documents remain subject to their
+respective copyright and usage terms.
 
-The accuracy of the content is based on the laws and regulations as of the time of retrieval.
 
 ⚠️COPYRIGHT<br>
 Data: Public domain<br>Textual commentary: CC BY-NC-ND-4.0
-
-Original government documents remain subject to their
-respective copyright and usage terms.
